@@ -8,6 +8,7 @@
 #include "ray.h"
 #include "mesh.h"
 #include "sphere.h"
+#include "plane.h"
 #include "camera.h"
 #include "raytracer.h"
 #include <stdlib.h>
@@ -16,17 +17,17 @@
 using namespace std;
 
 // Raytracing settings
-int maxBounces = 1;
+int maxBounces = 10;
 
 // Image
-int imHeight = 325;
-int imWidth = 500;
+int imHeight = 300;
+int imWidth = 400;
 
 // Camera
 camera cam;
 
 // Post Processing
-postProcessing post;
+int aaSamples = 100;
 
 // World
 world scene;
@@ -40,13 +41,32 @@ SDL_Renderer* renderer;
 // Place objects here
 void SetupScene() {
 	sphere* s1 = new sphere(vec(0, 0, -0.5), 0.25);
+	plane* p1 = new plane(vec(0,-1,0), vec(0,1,0));
 	scene.addObject(s1);
+	scene.addObject(p1);
 }
 
 void DrawPixel(vec color, int x, int y) {
 
 	SDL_SetRenderDrawColor(renderer, (int)(color.x * 255), (int)(color.y * 255), (int)(color.z * 255), SDL_ALPHA_OPAQUE);
 	SDL_RenderDrawPoint(renderer, x, y);
+}
+
+vec rayTrace(const ray& r, const double minDist = 0, const double maxDist = INFINITY, int depth = 0) {
+	if (depth >= maxBounces)
+		return vec(0);
+	rayHitInfo hitInfo;
+	bool hit;
+	for (auto const& x : scene.getObjects()) {
+		if (x->rayhit(r, minDist, maxDist, hitInfo)) {
+			// normal shading
+			//return 0.5 * (hitInfo.normal + vec(1));
+			vec diffuseRay = hitInfo.point + hitInfo.normal + randVecInUnitSphere();
+			return 0.5 * rayTrace(ray(hitInfo.point, diffuseRay - hitInfo.point), minDist, maxDist, depth + 1);
+		}
+	}
+	auto t = 0.5 * (norm(r.dir).y + 1.0);
+	return (1.0 - t) * vec(1.0, 1.0, 1.0) + t * vec(0.5, 0.7, 1.0);
 }
 
 int main(int argc, char *args[]) {
@@ -64,33 +84,37 @@ int main(int argc, char *args[]) {
 
 	bool quit = false;
 
-	rayTracer rt;	
 	SetupScene();
-	rt.setScene(&scene);
-
-	post.antiAliasing = true;
-	post.aaSamples = 100;
-
-	//rt.Render(&scene, imWidth, imHeight, post, DrawPixel);
 
 	int px(0);
 	int py(imHeight - 1);
 	bool rendering(1);
 	int counter(0);
 	int totalPix = imHeight * imWidth;
+	
 	while (!quit) {
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT)
 				quit = true;
 		}
-
 		if (rendering) {
 			vec pix;
-			auto u = double(px + rand01()) / (imWidth - 1);
-			auto v = double(py + rand01()) / (imHeight - 1);
-			ray r(scene.cam.pos, scene.cam.pixelAt(u, v));
-			pix += rt.rayTrace(r);
+
+			// Anti-Aliasing
+			for (int aa = 0; aa < aaSamples; aa++) {
+				auto u = double(px + rand01()) / (imWidth - 1);
+				auto v = double(py + rand01()) / (imHeight - 1);
+				ray r(scene.cam.pos, scene.cam.pixelAt(u, v));
+				pix += rayTrace(r);
+			}
+
+			double scale = 1.0 / aaSamples;
+			pix *= scale;
+			pix.x = clamp(pix.x, 0, 0.999);
+			pix.y = clamp(pix.y, 0, 0.999);
+			pix.z = clamp(pix.z, 0, 0.999);
 			DrawPixel(pix, px, py);
+
 			// loop control
 			px++;
 			if (px >= imWidth) {

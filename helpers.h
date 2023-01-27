@@ -3,7 +3,7 @@
 
 inline double rand01(bool inclusive = false) {
 	if (inclusive)
-		return rand() / RAND_MAX;
+		return rand() / (double)RAND_MAX;
 	return rand() / (RAND_MAX + 1.0);
 }
 

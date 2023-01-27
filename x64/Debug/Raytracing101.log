@@ -1,2 +1,3 @@
 ﻿  main.cpp
+D:\Raytracing101\Raytracing101\main.cpp(59,7): warning C4101: 'hit': unreferenced local variable
   Raytracing101.vcxproj -> D:\Raytracing101\x64\Debug\Raytracing101.exe

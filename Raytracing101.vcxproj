@@ -138,7 +138,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="raytracer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
@@ -146,7 +145,6 @@
     <ClInclude Include="mesh.h" />
     <ClInclude Include="plane.h" />
     <ClInclude Include="ray.h" />
-    <ClInclude Include="raytracer.h" />
     <ClInclude Include="sphere.h" />
     <ClInclude Include="vec.h" />
     <ClInclude Include="world.h" />
