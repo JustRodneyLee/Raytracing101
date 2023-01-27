@@ -17,7 +17,7 @@
 using namespace std;
 
 // Raytracing settings
-int maxBounces = 10;
+int maxBounces = 50;
 
 // Image
 int imHeight = 300;
@@ -41,7 +41,8 @@ SDL_Renderer* renderer;
 // Place objects here
 void SetupScene() {
 	sphere* s1 = new sphere(vec(0, 0, -0.5), 0.25);
-	plane* p1 = new plane(vec(0,-1,0), vec(0,1,0));
+	plane* p1 = new plane(vec(0,-0.25,0), vec(0,1,0));
+
 	scene.addObject(s1);
 	scene.addObject(p1);
 }
@@ -52,16 +53,14 @@ void DrawPixel(vec color, int x, int y) {
 	SDL_RenderDrawPoint(renderer, x, y);
 }
 
-vec rayTrace(const ray& r, const double minDist = 0, const double maxDist = INFINITY, int depth = 0) {
+vec rayTrace(const ray& r, const double minDist = epsilon, const double maxDist = INFINITY, int depth = 0) {
 	if (depth >= maxBounces)
 		return vec(0);
 	rayHitInfo hitInfo;
 	bool hit;
 	for (auto const& x : scene.getObjects()) {
 		if (x->rayhit(r, minDist, maxDist, hitInfo)) {
-			// normal shading
-			//return 0.5 * (hitInfo.normal + vec(1));
-			vec diffuseRay = hitInfo.point + hitInfo.normal + randVecInUnitSphere();
+			vec diffuseRay = hitInfo.point + hitInfo.normal + randUnitVec();
 			return 0.5 * rayTrace(ray(hitInfo.point, diffuseRay - hitInfo.point), minDist, maxDist, depth + 1);
 		}
 	}
@@ -91,7 +90,8 @@ int main(int argc, char *args[]) {
 	bool rendering(1);
 	int counter(0);
 	int totalPix = imHeight * imWidth;
-	
+	ios_base::sync_with_stdio(false);
+	cin.tie(NULL);
 	while (!quit) {
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT)
@@ -109,12 +109,10 @@ int main(int argc, char *args[]) {
 			}
 
 			double scale = 1.0 / aaSamples;
-			pix *= scale;
-			pix.x = clamp(pix.x, 0, 0.999);
-			pix.y = clamp(pix.y, 0, 0.999);
-			pix.z = clamp(pix.z, 0, 0.999);
-			DrawPixel(pix, px, py);
-
+			pix.x = clamp(sqrt(scale * pix.x), 0, 0.999);
+			pix.y = clamp(sqrt(scale * pix.y), 0, 0.999);
+			pix.z = clamp(sqrt(scale * pix.z), 0, 0.999);
+			DrawPixel(pix, px, imHeight - 1 - py);
 			// loop control
 			px++;
 			if (px >= imWidth) {
@@ -124,7 +122,7 @@ int main(int argc, char *args[]) {
 			counter++;
 			if (py < 0)
 				rendering = false;
-			cout << "Rendered " << counter << "/" << totalPix << endl;
+			//cout << "Rendered " << counter << "/" << totalPix << endl;
 		}
 		//SDL_RenderClear(renderer);
 		SDL_RenderPresent(renderer);

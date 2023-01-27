@@ -99,3 +99,14 @@ inline vec randVecInUnitSphere() {
 	}
 	return val;
 }
+
+inline vec randUnitVec() {
+	return norm(randVecInUnitSphere());
+}
+
+vec randHemisphere(const vec& normal) {
+	vec r = randVecInUnitSphere();
+	if (dot(r, normal) > 0.0)
+		return r;
+	return -r;
+}

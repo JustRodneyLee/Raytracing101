@@ -2,11 +2,12 @@
 #include "vec.h"
 #include "ray.h"
 #include "mesh.h"
+#include "helpers.h"
+#include "world.h"
 
 class plane : public mesh {
 public:
-	vec normal;
-
+	vec normal;	
 public:
 	plane(vec o, vec norm) : mesh(o) {
 		normal = norm;
@@ -20,12 +21,11 @@ public:
 };
 
 bool plane::rayhit(const ray& r, double tmin, double tmax, rayHitInfo& info) const {
-	vec o = r.dir - transform.origin;
-	double d = dot(normal, r.dir);
-	if (d == 0)
-		return false;
-
-	info.t = -dot(normal, r.origin - transform.origin) / d;
+	auto d = dot(r.dir, normal);
+	if (abs(d) < epsilon) return false;
+	auto trace = dot(normal, transform.origin - r.origin) / d;
+	if (trace < epsilon) return false;
+	info.t = trace;
 	info.point = r.at(info.t);
 	info.setFaceNormal(r, normal);
 	return true;

@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdlib>
 
+extern double epsilon = 0.000001;
+
 inline double rand01(bool inclusive = false) {
 	if (inclusive)
 		return rand() / (double)RAND_MAX;

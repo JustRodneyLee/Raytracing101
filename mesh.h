@@ -2,18 +2,6 @@
 #include "vec.h"
 #include "ray.h"
 
-struct rayHitInfo {
-	vec point;
-	vec normal;
-	double t;
-	bool frontFace;
-
-	inline void setFaceNormal(const ray& r, const vec& outwardNormal) {
-		frontFace = dot(r.dir, outwardNormal) < 0.0;
-		normal = frontFace ? outwardNormal : -outwardNormal;
-	}
-};
-
 struct transform {
 	vec origin;
 	vec scale;
