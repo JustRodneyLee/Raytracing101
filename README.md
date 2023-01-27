@@ -1,2 +1,4 @@
 # Raytracing101
- Learning Raytracing. Reference: Raytracing in a weekend
+ Learning Raytracing.
+
+“Ray Tracing in One Weekend.” raytracing.github.io/books/RayTracingInOneWeekend.html
