@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdlib>
 
-extern double epsilon = 0.000001;
+extern double epsilon;
 
 inline double rand01(bool inclusive = false) {
 	if (inclusive)

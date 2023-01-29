@@ -37,6 +37,6 @@ bool sphere::rayhit(const ray& r, double tmin, double tmax, rayHitInfo& info) co
 	info.t = root;
 	info.point = r.at(info.t);
 	info.setFaceNormal(r, (info.point - transform.origin) / radius);
-
+	info.mat = mat;
 	return true;
 }

@@ -1,25 +1,18 @@
 #pragma once
 #include "vec.h"
+#include <memory>
 
-struct ray {
+using std::shared_ptr;
+
+struct ray{
 	vec origin;
 	vec dir;
+
+	ray() : origin(0), dir(0) {}
 
 	ray(const vec& o, const vec& d) : origin(o), dir(d) {}
 
 	vec at(double t) const {
 		return origin + norm(dir) * t;
-	}
-};
-
-struct rayHitInfo {
-	vec point;
-	vec normal;
-	double t;
-	bool frontFace;
-
-	inline void setFaceNormal(const ray& r, const vec& outwardNormal) {
-		frontFace = dot(r.dir, outwardNormal) < 0.0;
-		normal = frontFace ? outwardNormal : -outwardNormal;
 	}
 };

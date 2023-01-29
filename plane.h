@@ -3,13 +3,12 @@
 #include "ray.h"
 #include "mesh.h"
 #include "helpers.h"
-#include "world.h"
 
 class plane : public mesh {
 public:
 	vec normal;	
 public:
-	plane(vec o, vec norm) : mesh(o) {
+	plane(vec origin, vec norm) : mesh(origin) {
 		normal = norm;
 	}
 
@@ -24,9 +23,10 @@ bool plane::rayhit(const ray& r, double tmin, double tmax, rayHitInfo& info) con
 	auto d = dot(r.dir, normal);
 	if (abs(d) < epsilon) return false;
 	auto trace = dot(normal, transform.origin - r.origin) / d;
-	if (trace < epsilon) return false;
+	if (trace < epsilon) return false;	
 	info.t = trace;
-	info.point = r.at(info.t);
+	info.point = r.at(info.t);	
 	info.setFaceNormal(r, normal);
+	info.mat = mat;
 	return true;
 }

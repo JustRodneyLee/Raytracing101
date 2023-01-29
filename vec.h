@@ -67,6 +67,10 @@ inline vec operator*(const double s, const vec& v) {
 	return v * s;
 }
 
+inline vec operator*(const vec& v1, const vec& v2) {
+	return vec(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
+}
+
 inline vec operator/(const vec& v, const double s) {
 	return v * (1 / s);
 }
@@ -89,6 +93,10 @@ inline std::ostream& operator<<(std::ostream& out, const vec& v) {
 	return out << v.x << ' ' << v.y << ' ' << v.z;
 }
 
+inline vec reflect(const vec& v, const vec& n) {
+	return v - 2 * dot(v, n) * n;
+}
+
 inline vec randVecInUnitSphere() {
 	vec val;
 	while (true) {
@@ -104,7 +112,7 @@ inline vec randUnitVec() {
 	return norm(randVecInUnitSphere());
 }
 
-vec randHemisphere(const vec& normal) {
+inline vec randHemisphere(const vec& normal) {
 	vec r = randVecInUnitSphere();
 	if (dot(r, normal) > 0.0)
 		return r;

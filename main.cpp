@@ -1,8 +1,9 @@
 #include <iostream>
-#include "vec.h"
 #include <vector>
-#include <iostream>
 #include <string>
+#include <stdlib.h>
+
+#include "vec.h"
 #include "helpers.h"
 #include "vec.h"
 #include "ray.h"
@@ -11,10 +12,11 @@
 #include "plane.h"
 #include "camera.h"
 #include "raytracer.h"
-#include <stdlib.h>
 #include "SDL.h"
 
 using namespace std;
+
+double epsilon = 0.00000001;
 
 // Raytracing settings
 int maxBounces = 50;
@@ -32,7 +34,7 @@ int aaSamples = 100;
 // World
 world scene;
 
-// SDL
+// SDL 
 SDL_Event event;
 SDL_Window* window;
 SDL_Surface* surface;
@@ -40,11 +42,11 @@ SDL_Renderer* renderer;
 
 // Place objects here
 void SetupScene() {
-	sphere* s1 = new sphere(vec(0, 0, -0.5), 0.25);
-	plane* p1 = new plane(vec(0,-0.25,0), vec(0,1,0));
-
-	scene.addObject(s1);
-	scene.addObject(p1);
+	scene.addObject(make_shared<sphere>(vec(0, 0, -0.5), 0.25));
+	auto sphereMetal = make_shared<sphere>(vec(0.5, 0, -0.5), 0.25);
+	sphereMetal->setMaterial(make_shared<metal>(vec(0.5)));
+	scene.addObject(sphereMetal);
+	scene.addObject(make_shared<plane>(vec(0, -0.25, 0), vec(0, 1, 0)));
 }
 
 void DrawPixel(vec color, int x, int y) {
@@ -57,11 +59,17 @@ vec rayTrace(const ray& r, const double minDist = epsilon, const double maxDist 
 	if (depth >= maxBounces)
 		return vec(0);
 	rayHitInfo hitInfo;
-	bool hit;
+	bool hit(0);
 	for (auto const& x : scene.getObjects()) {
 		if (x->rayhit(r, minDist, maxDist, hitInfo)) {
-			vec diffuseRay = hitInfo.point + hitInfo.normal + randUnitVec();
-			return 0.5 * rayTrace(ray(hitInfo.point, diffuseRay - hitInfo.point), minDist, maxDist, depth + 1);
+			ray scatter;
+			vec color;
+			if (hitInfo.mat->scatter(r, hitInfo, color, scatter))
+				return color * rayTrace(scatter, epsilon, INFINITY, depth + 1);
+
+			return vec(0);
+			//vec diffuseRay = hitInfo.point + hitInfo.normal + randUnitVec();
+			//return 0.5 * rayTrace(ray(hitInfo.point, diffuseRay - hitInfo.point), minDist, maxDist, depth + 1);
 		}
 	}
 	auto t = 0.5 * (norm(r.dir).y + 1.0);

@@ -1,38 +1,26 @@
 #pragma once
-#include "vec.h"
-#include "ray.h"
 #include "mesh.h"
 #include "camera.h"
 #include <vector>
+#include <memory>
 
 using namespace std;
 
 class world {
 public:
 	camera cam;	
-//private:
-	vector<mesh*> objs;
+private:
+	vector<shared_ptr<mesh>> objs;
 public:	
-	void addObject(mesh* mesh);
+	void addObject(shared_ptr<mesh> mesh);
 
-	vector<mesh*> getObjects() const;
-
-	void clear();
-
-	~world() {
-		clear();
-	}
+	vector<shared_ptr<mesh>> getObjects() const;
 };
 
-inline void world::addObject(mesh* mesh) {
+inline void world::addObject(shared_ptr<mesh> mesh) {
 	objs.push_back(mesh);
 }
 
-inline vector<mesh*> world::getObjects() const {
+inline vector<shared_ptr<mesh>> world::getObjects() const {
 	return objs;
-}
-
-inline void world::clear() {
-	for (auto x : objs)
-		delete(x);
 }
