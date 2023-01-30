@@ -22,6 +22,8 @@ double epsilon = 0.00000001;
 int maxBounces = 50;
 
 // Image
+vector<vector<vec>> imData;
+vector<vec> row;
 int imHeight = 300;
 int imWidth = 400;
 
@@ -42,11 +44,14 @@ SDL_Renderer* renderer;
 
 // Place objects here
 void SetupScene() {
+	scene.addObject(make_shared<plane>(vec(0, -0.25, 0), vec(0, 1, 0)));
 	scene.addObject(make_shared<sphere>(vec(0, 0, -0.5), 0.25));
 	auto sphereMetal = make_shared<sphere>(vec(0.5, 0, -0.5), 0.25);
 	sphereMetal->setMaterial(make_shared<metal>(vec(0.5)));
 	scene.addObject(sphereMetal);
-	scene.addObject(make_shared<plane>(vec(0, -0.25, 0), vec(0, 1, 0)));
+	auto sphereMetal2 = make_shared<sphere>(vec(-0.5, 0, -0.5), 0.25);
+	sphereMetal2->setMaterial(make_shared<metal>(vec(0.8, 0.6, 0.2)));
+	scene.addObject(sphereMetal2);	
 }
 
 void DrawPixel(vec color, int x, int y) {
@@ -59,18 +64,20 @@ vec rayTrace(const ray& r, const double minDist = epsilon, const double maxDist 
 	if (depth >= maxBounces)
 		return vec(0);
 	rayHitInfo hitInfo;
-	bool hit(0);
+	bool hit(0);	
+	double nMaxDist(maxDist);
 	for (auto const& x : scene.getObjects()) {
-		if (x->rayhit(r, minDist, maxDist, hitInfo)) {
-			ray scatter;
-			vec color;
-			if (hitInfo.mat->scatter(r, hitInfo, color, scatter))
-				return color * rayTrace(scatter, epsilon, INFINITY, depth + 1);
-
-			return vec(0);
-			//vec diffuseRay = hitInfo.point + hitInfo.normal + randUnitVec();
-			//return 0.5 * rayTrace(ray(hitInfo.point, diffuseRay - hitInfo.point), minDist, maxDist, depth + 1);
+		if (x->rayhit(r, minDist, nMaxDist, hitInfo)) {
+			hit = true;	
+			nMaxDist = hitInfo.t;			
 		}
+	}
+	if (hit) {
+		ray scatter;
+		vec color;
+		if (hitInfo.mat->scatter(r, hitInfo, color, scatter))
+			return color * rayTrace(scatter, epsilon, nMaxDist, depth + 1);
+		return vec(0);
 	}
 	auto t = 0.5 * (norm(r.dir).y + 1.0);
 	return (1.0 - t) * vec(1.0, 1.0, 1.0) + t * vec(0.5, 0.7, 1.0);
@@ -95,7 +102,7 @@ int main(int argc, char *args[]) {
 
 	int px(0);
 	int py(imHeight - 1);
-	bool rendering(1);
+	bool rendering(1), flag(0);
 	int counter(0);
 	int totalPix = imHeight * imWidth;
 	ios_base::sync_with_stdio(false);
@@ -120,22 +127,31 @@ int main(int argc, char *args[]) {
 			pix.x = clamp(sqrt(scale * pix.x), 0, 0.999);
 			pix.y = clamp(sqrt(scale * pix.y), 0, 0.999);
 			pix.z = clamp(sqrt(scale * pix.z), 0, 0.999);
+			row.push_back(pix);
 			DrawPixel(pix, px, imHeight - 1 - py);
 			// loop control
 			px++;
 			if (px >= imWidth) {
 				px = 0;
 				py--;
+				imData.push_back(row);
+				row.clear();
 			}
 			counter++;
-			if (py < 0)
+			if (py < 0) {
 				rendering = false;
-			//cout << "Rendered " << counter << "/" << totalPix << endl;
+				flag = 1;
+			}				
+			cout << "Rendered " << counter << "/" << totalPix << endl;
 		}
-		//SDL_RenderClear(renderer);
-		SDL_RenderPresent(renderer);
-	}
 
+		if (flag) {
+			cout << "Render complete" << endl;
+			flag = !flag;			
+		}
+		//SDL_RenderClear(renderer);		
+		SDL_RenderPresent(renderer);
+	}	
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 	return 0;

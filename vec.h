@@ -97,7 +97,7 @@ inline vec reflect(const vec& v, const vec& n) {
 	return v - 2 * dot(v, n) * n;
 }
 
-inline vec randVecInUnitSphere() {
+inline vec randVecInUnitSphere(bool normalize = false) {
 	vec val;
 	while (true) {
 		val.x = randDouble(-1, 1);
@@ -105,11 +105,9 @@ inline vec randVecInUnitSphere() {
 		val.z = randDouble(-1, 1);
 		if (val.len() <= 1) break;
 	}
+	if (normalize)
+		return norm(val);
 	return val;
-}
-
-inline vec randUnitVec() {
-	return norm(randVecInUnitSphere());
 }
 
 inline vec randHemisphere(const vec& normal) {
