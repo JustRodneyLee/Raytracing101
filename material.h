@@ -37,7 +37,7 @@ class metal : public material {
 private:
 	double roughness;
 public:
-	metal(vec alebdo, double roughness = 0) : material(albedo) { this->roughness = roughness < 1 ? roughness : 1; }
+	metal(vec albedo, double roughness = 0) : material(albedo) { this->roughness = roughness < 1 ? roughness : 1; }
 	virtual bool scatter(const ray& r, const rayHitInfo& hitInfo, vec& attenuation, ray& scattered) const override;
 };
 

@@ -24,8 +24,8 @@ int maxBounces = 50;
 // Image
 vector<vector<vec>> imData;
 vector<vec> row;
-int imHeight = 300;
-int imWidth = 400;
+int imHeight = 600;
+int imWidth = 800;
 
 // Camera
 camera cam;

@@ -18,12 +18,13 @@ bool metal::scatter(const ray& r, const rayHitInfo& hitinfo, vec& attenuation, r
 	return dot(scattered.dir, hitinfo.normal) > 0;
 }
 
-bool dielectric::scatter(const ray& r, const rayHitInfo& hitinfo, vec& attenuation, ray& scattered) const {
-	vec reflection = reflect(norm(r.dir), hitinfo.normal);
-	scattered = ray(hitinfo.point, reflection + roughness * randVecInUnitSphere(true));
-	attenuation = albedo;
-	return dot(scattered.dir, hitinfo.normal) > 0;
-}
+//
+//bool dielectric::scatter(const ray& r, const rayHitInfo& hitinfo, vec& attenuation, ray& scattered) const {
+//	vec reflection = reflect(norm(r.dir), hitinfo.normal);
+//	scattered = ray(hitinfo.point, reflection + roughness * randVecInUnitSphere(true));
+//	attenuation = albedo;
+//	return dot(scattered.dir, hitinfo.normal) > 0;
+//}
 
 //bool material::scatter(const ray& r, const rayHitInfo& hitInfo, vec& attenuation, ray& scattered) const {
 //	if (metallic) {
